@@ -16,10 +16,10 @@ import requests
 BASE_URL = "https://world.openfoodfacts.org"
 TIMEOUT = 20  # increased from 8 — OFF servers can be slow
 
-# ⚠️  OpenFoodFacts REQUIRES a User-Agent header that identifies your app.
+# OpenFoodFacts REQUIRES a User-Agent header that identifies your app.
 # Without it, many requests return empty or are silently blocked.
 HEADERS = {
-    "User-Agent": "FlaskInventoryApp/1.0 (contact@youremail.com)"
+    "User-Agent": "FlaskInventoryApp/1.0 (munyokicaleb@gmail.com)"
 }
 
 
