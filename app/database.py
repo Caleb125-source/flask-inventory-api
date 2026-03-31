@@ -5,8 +5,6 @@ Simulated in-memory database for the inventory management system.
 Modelled after the OpenFoodFacts API response structure.
 """
 
-import uuid
-
 # ---------------------------------------------------------------------------
 # Mock inventory – each entry mirrors OpenFoodFacts product fields plus
 # store-specific fields (id, price, stock, category, barcode).
@@ -123,11 +121,11 @@ def get_item_by_id(item_id: str):
 def add_item(data: dict):
     """
     Append a new item to the inventory.
-    Generates a unique id if one is not supplied.
+    Generates an incremental id if one is not supplied.
     Returns the newly created item.
     """
     new_item = {
-        "id": data.get("id", str(uuid.uuid4())[:8]),
+        "id": data.get("id", str(max(int(item["id"]) for item in inventory if item["id"].isdigit()) + 1) if inventory else "1"),
         "barcode": data.get("barcode", ""),
         "product_name": data.get("product_name", "Unknown Product"),
         "brands": data.get("brands", ""),
