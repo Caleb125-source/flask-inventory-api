@@ -20,7 +20,7 @@ API_BASE = "http://127.0.0.1:5000/inventory"
 
 # ── Low-level HTTP helpers ────────────────────────────────────────────────────
 
-def _get(path=""):
+def _get(path="") -> dict:
     try:
         r = requests.get(API_BASE + path, timeout=5)
         return r.json()
@@ -28,9 +28,10 @@ def _get(path=""):
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
     except Exception as exc:
         _fatal(f"Unexpected error: {exc}")
+    return {}
 
 
-def _post(path="", body=None):
+def _post(path="", body=None) -> dict:
     try:
         r = requests.post(API_BASE + path, json=body or {}, timeout=5)
         return r.json()
@@ -38,9 +39,10 @@ def _post(path="", body=None):
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
     except Exception as exc:
         _fatal(f"Unexpected error: {exc}")
+    return {}
 
 
-def _patch(path, body):
+def _patch(path, body) -> dict:
     try:
         r = requests.patch(API_BASE + path, json=body, timeout=5)
         return r.json()
@@ -48,9 +50,10 @@ def _patch(path, body):
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
     except Exception as exc:
         _fatal(f"Unexpected error: {exc}")
+    return {}
 
 
-def _delete(path):
+def _delete(path) -> dict:
     try:
         r = requests.delete(API_BASE + path, timeout=5)
         return r.json()
@@ -58,6 +61,7 @@ def _delete(path):
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
     except Exception as exc:
         _fatal(f"Unexpected error: {exc}")
+    return {}
 
 
 # ── Display helpers ───────────────────────────────────────────────────────────
@@ -112,8 +116,8 @@ def _prompt(label: str, default=None) -> str:
 def view_all_inventory():
     """List all inventory items in a compact table."""
     result = _get()
-    if result["status"] != "success":
-        print(f"\n  Error: {result['message']}\n")
+    if not result or result["status"] != "success":
+        print(f"\n  Error: {result.get('message', 'Unknown error') if result else 'Unknown error'}\n")
         return
     items = result["data"]
     if not items:
@@ -138,6 +142,9 @@ def view_single_item():
     if result["status"] != "success":
         print(f"\n  ✖  {result['message']}\n")
         return
+    if result["data"] is None:
+        print(f"\n  ✖  Item not found.\n")
+        return
     print(f"\n  {DIVIDER}")
     _print_item(result["data"])
 
@@ -153,7 +160,7 @@ def add_new_item():
         print("  Product name is required. Cancelled.\n")
         return
 
-    body = {
+    body: dict = {
         "product_name": product_name,
         "brands":            _prompt("Brand"),
         "category":          _prompt("Category"),
@@ -163,8 +170,8 @@ def add_new_item():
     }
 
     try:
-        body["price"] = float(_prompt("Price ($)", 0.0))
-        body["stock"] = int(_prompt("Stock (units)", 0))
+        body["price"] = float(_prompt("Price ($)", str(0.0)))
+        body["stock"] = int(_prompt("Stock (units)", str(0)))
     except ValueError:
         print("  ✖  Invalid price or stock value. Cancelled.\n")
         return
@@ -196,13 +203,13 @@ def update_item_menu():
 
     updates = {}
 
-    new_price = _prompt(f"New price", item["price"])
+    new_price = _prompt(f"New price", str(item["price"]))
     try:
         updates["price"] = float(new_price)
     except (ValueError, TypeError):
         print("  ✖  Invalid price – skipping price update.")
 
-    new_stock = _prompt(f"New stock", item["stock"])
+    new_stock = _prompt(f"New stock", str(item["stock"]))
     try:
         updates["stock"] = int(new_stock)
     except (ValueError, TypeError):
