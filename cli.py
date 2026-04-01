@@ -111,6 +111,26 @@ def _prompt(label: str, default=None) -> str:
     return val if val else (str(default) if default is not None else "")
 
 
+def _import_product(product: dict):
+    """Ask for price/stock/category then POST the product directly to inventory."""
+    try:
+        price = float(_prompt("Price ($)", 0.0))
+        stock = int(_prompt("Stock (units)", 0))
+    except ValueError:
+        print("  ✖  Invalid values. Import cancelled.\n")
+        return
+
+    current_category = product.get("category", "Uncategorized")
+    category = _prompt("Category", current_category)
+
+    body = {**product, "price": price, "stock": stock, "category": category}
+    result = _post("", body)
+    if result["status"] != "success":
+        print(f"\n  ✖  {result['message']}\n")
+    else:
+        print(f"\n  ✔  Product imported! Assigned id: {result['data']['id']}\n")
+
+
 # ── Feature functions ─────────────────────────────────────────────────────────
 
 def view_all_inventory():
@@ -282,19 +302,8 @@ def search_external_api():
         print(f"\n  Found on OpenFoodFacts:")
         _print_item(result["data"])
 
-        # Offer to import
         if input("  Add this product to local inventory? (yes/no): ").strip().lower() == "yes":
-            try:
-                price = float(_prompt("Price ($)", 0.0))
-                stock = int(_prompt("Stock (units)", 0))
-            except ValueError:
-                print("  ✖  Invalid values. Import cancelled.\n")
-                return
-            import_result = _post(f"/import/{barcode}", {"price": price, "stock": stock})
-            if import_result["status"] != "success":
-                print(f"\n  ✖  {import_result['message']}\n")
-            else:
-                print(f"\n  ✔  Product imported! Assigned id: {import_result['data']['id']}\n")
+            _import_product(result["data"])
 
     elif choice == "2":
         name = _prompt("Product name")
@@ -308,8 +317,28 @@ def search_external_api():
         products = result["data"]
         print(f"\n  Found {len(products)} result(s):\n")
         for i, p in enumerate(products, start=1):
-            print(f"  [{i}] {p.get('product_name', 'Unknown')}  |  {p.get('brands', '')}  |  {p.get('quantity', '')}")
+            print(f"  [{i}] {p.get('product_name', 'Unknown'):<35} "
+                  f"{p.get('brands', ''):<20} {p.get('quantity', '')}")
         print()
+
+        # ── Let user pick one to import ──────────────────────────────────────
+        pick = input("  Enter number to add to inventory (or press Enter to skip): ").strip()
+        if not pick:
+            print("  Skipped.\n")
+            return
+        try:
+            index = int(pick) - 1
+            if index < 0 or index >= len(products):
+                raise ValueError
+        except ValueError:
+            print("  ✖  Invalid selection.\n")
+            return
+
+        selected = products[index]
+        print(f"\n  Selected: {selected.get('product_name', 'Unknown')}")
+        _print_item(selected)
+        _import_product(selected)
+
     else:
         print("  Invalid choice.\n")
 
