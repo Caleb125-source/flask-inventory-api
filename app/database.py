@@ -1,6 +1,4 @@
 """
-database.py
------------
 JSON-file-backed database for the inventory management system.
 Data is persisted to 'inventory.json' in the project root so that
 items survive server restarts.
@@ -9,16 +7,11 @@ items survive server restarts.
 import json
 import os
 
-# ---------------------------------------------------------------------------
 # Path to the JSON file that stores inventory data.
-# Sits next to database.py's parent directory (project root).
-# ---------------------------------------------------------------------------
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "inventory.json")
 
-# ---------------------------------------------------------------------------
 # Seed data – only written to disk if inventory.json does not yet exist.
-# ---------------------------------------------------------------------------
 
 _SEED = [
     {
@@ -113,10 +106,7 @@ _SEED = [
     },
 ]
 
-
-# ---------------------------------------------------------------------------
 # Internal load / save helpers
-# ---------------------------------------------------------------------------
 
 def _load() -> list:
     """Read inventory from the JSON file. Seeds the file if it doesn't exist."""
@@ -132,10 +122,7 @@ def _save(data: list) -> None:
     with open(DB_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-
-# ---------------------------------------------------------------------------
-# Public API (same interface as before — routes.py needs no changes)
-# ---------------------------------------------------------------------------
+# Public API 
 
 def get_all_items() -> list:
     """Return the full inventory list from disk."""
