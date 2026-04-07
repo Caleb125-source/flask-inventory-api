@@ -1,11 +1,6 @@
 """
-tests/test_external_api.py
---------------------------
-Unit tests for app/external_api.py using unittest.mock so no real
-HTTP requests are made during the test suite.
+Unit tests for app/external_api.py 
 
-Run with:
-    pytest tests/test_external_api.py -v
 """
 
 import pytest
@@ -17,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from app.external_api import fetch_by_barcode, fetch_by_name
 
 
-# ── Shared mock helpers ────────────────────────────────────────────────────────
+# Shared mock helpers
 
 def _mock_response(json_data: dict, status_code: int = 200, raise_for=None):
     """Build a MagicMock that behaves like a requests.Response."""
@@ -47,7 +42,7 @@ SAMPLE_OFF_PRODUCT = {
 }
 
 
-# ── fetch_by_barcode ───────────────────────────────────────────────────────────
+# fetch_by_barcode 
 
 class TestFetchByBarcode:
     def test_returns_product_dict_on_success(self):
@@ -107,7 +102,7 @@ class TestFetchByBarcode:
         assert "openfoodfacts" in url_called
 
 
-# ── fetch_by_name ──────────────────────────────────────────────────────────────
+# fetch_by_name
 
 class TestFetchByName:
     def test_returns_list_of_products(self):

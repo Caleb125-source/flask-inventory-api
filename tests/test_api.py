@@ -1,10 +1,6 @@
 """
-tests/test_api.py
------------------
 Unit tests for every Flask REST endpoint.
 
-Run with:
-    pytest tests/test_api.py -v
 """
 
 import pytest
@@ -18,7 +14,7 @@ from app import create_app
 import app.database as db
 
 
-# ── Fixtures ──────────────────────────────────────────────────────────────────
+# Fixtures
 
 @pytest.fixture
 def client():
@@ -63,7 +59,7 @@ def client():
         yield test_client
 
 
-# ── GET /inventory ─────────────────────────────────────────────────────────────
+# GET /inventory 
 
 class TestGetAllInventory:
     def test_returns_200(self, client):
@@ -85,7 +81,7 @@ class TestGetAllInventory:
                 assert field in item, f"Missing field '{field}' in item"
 
 
-# ── GET /inventory/<id> ────────────────────────────────────────────────────────
+# GET /inventory/<id>
 
 class TestGetSingleItem:
     def test_returns_200_for_existing_item(self, client):
@@ -106,7 +102,7 @@ class TestGetSingleItem:
         assert body["status"] == "error"
 
 
-# ── POST /inventory ────────────────────────────────────────────────────────────
+# POST /inventory
 
 class TestCreateItem:
     def test_returns_201_on_success(self, client):
@@ -144,7 +140,7 @@ class TestCreateItem:
         assert after == before + 1
 
 
-# ── PATCH /inventory/<id> ──────────────────────────────────────────────────────
+# PATCH /inventory/<id>
 
 class TestUpdateItem:
     def test_returns_200_on_success(self, client):
@@ -176,7 +172,7 @@ class TestUpdateItem:
         assert resp.status_code == 400
 
 
-# ── DELETE /inventory/<id> ─────────────────────────────────────────────────────
+# DELETE /inventory/<id>
 
 class TestDeleteItem:
     def test_returns_200_on_success(self, client):
@@ -203,7 +199,7 @@ class TestDeleteItem:
         assert resp.status_code == 404
 
 
-# ── GET /inventory/search/barcode/<barcode> ────────────────────────────────────
+# GET /inventory/search/barcode/<barcode>
 
 class TestSearchBarcode:
     def test_returns_product_on_valid_barcode(self, client, mocker):
@@ -228,7 +224,7 @@ class TestSearchBarcode:
         assert resp.status_code == 404
 
 
-# ── GET /inventory/search/name/<name> ─────────────────────────────────────────
+# GET /inventory/search/name/<name>
 
 class TestSearchName:
     def test_returns_results_list(self, client, mocker):
@@ -246,7 +242,7 @@ class TestSearchName:
         assert resp.status_code == 404
 
 
-# ── POST /inventory/import/<barcode> ──────────────────────────────────────────
+# POST /inventory/import/<barcode>
 
 class TestImportFromApi:
     def test_imports_product_into_inventory(self, client, mocker):

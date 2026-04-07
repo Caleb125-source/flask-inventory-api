@@ -1,10 +1,6 @@
 """
-tests/test_database.py
-----------------------
-Unit tests for the in-memory database helper functions in app/database.py.
+Unit tests for the database helper functions in app/database.py.
 
-Run with:
-    pytest tests/test_database.py -v
 """
 
 import pytest
@@ -15,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import app.database as db
 
 
-# ── Fixture: reset inventory before each test ─────────────────────────────────
+# Fixture: reset inventory before each test
 
 @pytest.fixture(autouse=True)
 def reset_inventory():
@@ -52,7 +48,7 @@ def reset_inventory():
     yield
 
 
-# ── get_all_items ──────────────────────────────────────────────────────────────
+# get_all_items
 
 class TestGetAllItems:
     def test_returns_list(self):
@@ -68,7 +64,7 @@ class TestGetAllItems:
         assert len(db.inventory) == 2
 
 
-# ── get_item_by_id ─────────────────────────────────────────────────────────────
+# get_item_by_id
 
 class TestGetItemById:
     def test_finds_existing_item(self):
@@ -85,7 +81,7 @@ class TestGetItemById:
         assert item["product_name"] == "Beta Juice"
 
 
-# ── add_item ───────────────────────────────────────────────────────────────────
+# add_item 
 
 class TestAddItem:
     def test_item_count_increases(self):
@@ -121,7 +117,7 @@ class TestAddItem:
         assert item["price"] == 0.0
 
 
-# ── update_item ────────────────────────────────────────────────────────────────
+# update_item 
 
 class TestUpdateItem:
     def test_updates_price(self):
@@ -164,7 +160,7 @@ class TestUpdateItem:
         assert isinstance(item["stock"], int)
 
 
-# ── delete_item ────────────────────────────────────────────────────────────────
+# delete_item
 
 class TestDeleteItem:
     def test_removes_item_from_inventory(self):
