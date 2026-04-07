@@ -1,0 +1,5 @@
+{
+  "pythonPath": "./venv/bin/python",
+  "extraPaths": ["."],
+  "include": ["app", "tests"]
+}
