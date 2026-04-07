@@ -5,4 +5,7 @@ __pycache__/
 Pipfile.lock
 .pytest_cache/inventory.json
 inventory.json
+<<<<<<< HEAD
+=======
 inventory.json
+>>>>>>> main
