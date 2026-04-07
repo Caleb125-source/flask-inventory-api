@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 """
-cli/cli.py
-----------
 Command-Line Interface for the Inventory Management System.
 
-Connects to the Flask API running at http://127.0.0.1:5000 and lets
-employees manage inventory without leaving the terminal.
+Connects to the Flask API running at http://127.0.0.1:5000 and lets employees manage inventory 
 
 Usage:
-    python cli/cli.py
+    python cli.py
 """
 
 import sys
@@ -18,7 +15,7 @@ import requests
 API_BASE = "http://127.0.0.1:5000/inventory"
 
 
-# ── Low-level HTTP helpers ────────────────────────────────────────────────────
+# Low-level HTTP helpers 
 
 def _get(path="") -> dict:
     try:
@@ -64,7 +61,7 @@ def _delete(path) -> dict:
     return {}
 
 
-# ── Display helpers ───────────────────────────────────────────────────────────
+# helpers 
 
 DIVIDER = "─" * 60
 
@@ -131,7 +128,7 @@ def _import_product(product: dict):
         print(f"\n  ✔  Product imported! Assigned id: {result['data']['id']}\n")
 
 
-# ── Feature functions ─────────────────────────────────────────────────────────
+# Feature functions 
 
 def view_all_inventory():
     """List all inventory items in a compact table."""
@@ -170,7 +167,6 @@ def view_single_item():
 
 
 def add_new_item():
-    """Interactively create a new inventory item."""
     print(f"\n  {DIVIDER}")
     print("  Add New Inventory Item  (press Enter to leave a field blank)")
     print(f"  {DIVIDER}")
@@ -321,7 +317,6 @@ def search_external_api():
                   f"{p.get('brands', ''):<20} {p.get('quantity', '')}")
         print()
 
-        # ── Let user pick one to import ──────────────────────────────────────
         pick = input("  Enter number to add to inventory (or press Enter to skip): ").strip()
         if not pick:
             print("  Skipped.\n")
@@ -343,7 +338,7 @@ def search_external_api():
         print("  Invalid choice.\n")
 
 
-# ── Main menu loop ────────────────────────────────────────────────────────────
+# Main menu loop 
 
 MENU = """
   ╔══════════════════════════════════════════════╗
