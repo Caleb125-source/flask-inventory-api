@@ -39,6 +39,49 @@ def _err(message, status=400):
     return jsonify({"status": "error", "message": message}), status
 
 
+# ── External-API endpoints ────────────────────────────────────────────────────
+# IMPORTANT: These must be registered BEFORE the /<string:item_id> routes,
+# otherwise Flask will match "search" as an item_id and never reach these.
+
+@inventory_bp.route("/search/barcode/<string:barcode>", methods=["GET"])
+def search_barcode(barcode):
+    """Fetch product details from OpenFoodFacts by barcode (does NOT modify inventory)."""
+    product = fetch_by_barcode(barcode)
+    if product is None:
+        return _err(f"No product found for barcode '{barcode}'.", 404)
+    return _ok(product)
+
+
+@inventory_bp.route("/search/name/<string:name>", methods=["GET"])
+def search_name(name):
+    """Search OpenFoodFacts by product name (does NOT modify inventory)."""
+    results = fetch_by_name(name)
+    if not results:
+        return _err(f"No products found matching '{name}'.", 404)
+    return _ok(results)
+
+
+@inventory_bp.route("/import/<string:barcode>", methods=["POST"])
+def import_from_api(barcode):
+    """
+    Fetch a product from OpenFoodFacts by barcode and add it to the inventory.
+    Optional JSON body fields: price, stock, category (to override/supplement API data).
+    """
+    product = fetch_by_barcode(barcode)
+    if product is None:
+        return _err(f"Could not fetch product for barcode '{barcode}' from OpenFoodFacts.", 404)
+
+    # Allow caller to supply store-specific fields
+    body = request.get_json(silent=True) or {}
+    product["price"] = float(body.get("price", 0.0))
+    product["stock"] = int(body.get("stock", 0))
+    if "category" in body:
+        product["category"] = body["category"]
+
+    new_item = add_item(product)
+    return _ok(new_item, 201)
+
+
 # ── CRUD endpoints ────────────────────────────────────────────────────────────
 
 @inventory_bp.route("", methods=["GET"])
@@ -94,44 +137,3 @@ def delete_item_route(item_id):
     if removed is None:
         return _err(f"Item with id '{item_id}' not found.", 404)
     return _ok({"deleted": removed})
-
-
-# ── External-API endpoints ────────────────────────────────────────────────────
-
-@inventory_bp.route("/search/barcode/<string:barcode>", methods=["GET"])
-def search_barcode(barcode):
-    """Fetch product details from OpenFoodFacts by barcode (does NOT modify inventory)."""
-    product = fetch_by_barcode(barcode)
-    if product is None:
-        return _err(f"No product found for barcode '{barcode}'.", 404)
-    return _ok(product)
-
-
-@inventory_bp.route("/search/name/<string:name>", methods=["GET"])
-def search_name(name):
-    """Search OpenFoodFacts by product name (does NOT modify inventory)."""
-    results = fetch_by_name(name)
-    if not results:
-        return _err(f"No products found matching '{name}'.", 404)
-    return _ok(results)
-
-
-@inventory_bp.route("/import/<string:barcode>", methods=["POST"])
-def import_from_api(barcode):
-    """
-    Fetch a product from OpenFoodFacts by barcode and add it to the inventory.
-    Optional JSON body fields: price, stock, category (to override/supplement API data).
-    """
-    product = fetch_by_barcode(barcode)
-    if product is None:
-        return _err(f"Could not fetch product for barcode '{barcode}' from OpenFoodFacts.", 404)
-
-    # Allow caller to supply store-specific fields
-    body = request.get_json(silent=True) or {}
-    product["price"] = float(body.get("price", 0.0))
-    product["stock"] = int(body.get("stock", 0))
-    if "category" in body:
-        product["category"] = body["category"]
-
-    new_item = add_item(product)
-    return _ok(new_item, 201)

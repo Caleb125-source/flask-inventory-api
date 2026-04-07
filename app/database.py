@@ -1,18 +1,26 @@
 """
 database.py
 -----------
-Simulated in-memory database for the inventory management system.
-Modelled after the OpenFoodFacts API response structure.
+JSON-file-backed database for the inventory management system.
+Data is persisted to 'inventory.json' in the project root so that
+items survive server restarts.
 """
 
-import uuid
+import json
+import os
 
 # ---------------------------------------------------------------------------
-# Mock inventory – each entry mirrors OpenFoodFacts product fields plus
-# store-specific fields (id, price, stock, category, barcode).
+# Path to the JSON file that stores inventory data.
+# Sits next to database.py's parent directory (project root).
 # ---------------------------------------------------------------------------
 
-inventory = [
+DB_PATH = os.path.join(os.path.dirname(__file__), "..", "inventory.json")
+
+# ---------------------------------------------------------------------------
+# Seed data – only written to disk if inventory.json does not yet exist.
+# ---------------------------------------------------------------------------
+
+_SEED = [
     {
         "id": "1",
         "barcode": "0041570050057",
@@ -107,27 +115,51 @@ inventory = [
 
 
 # ---------------------------------------------------------------------------
-# Helper utilities
+# Internal load / save helpers
 # ---------------------------------------------------------------------------
 
-def get_all_items():
-    """Return a copy of the full inventory list."""
-    return list(inventory)
+def _load() -> list:
+    """Read inventory from the JSON file. Seeds the file if it doesn't exist."""
+    if not os.path.exists(DB_PATH):
+        _save(_SEED)
+        return list(_SEED)
+    with open(DB_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _save(data: list) -> None:
+    """Write the full inventory list to the JSON file."""
+    with open(DB_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+# ---------------------------------------------------------------------------
+# Public API (same interface as before — routes.py needs no changes)
+# ---------------------------------------------------------------------------
+
+def get_all_items() -> list:
+    """Return the full inventory list from disk."""
+    return _load()
 
 
 def get_item_by_id(item_id: str):
     """Return a single item by its string id, or None if not found."""
+    inventory = _load()
     return next((item for item in inventory if item["id"] == str(item_id)), None)
 
 
-def add_item(data: dict):
+def add_item(data: dict) -> dict:
     """
-    Append a new item to the inventory.
-    Generates a unique id if one is not supplied.
+    Append a new item to the inventory and persist it.
+    Generates an incremental id if one is not supplied.
     Returns the newly created item.
     """
+    inventory = _load()
+    numeric_ids = [int(item["id"]) for item in inventory if item["id"].isdigit()]
+    next_id = str(max(numeric_ids) + 1) if numeric_ids else "1"
+
     new_item = {
-        "id": data.get("id", str(uuid.uuid4())[:8]),
+        "id": data.get("id", next_id),
         "barcode": data.get("barcode", ""),
         "product_name": data.get("product_name", "Unknown Product"),
         "brands": data.get("brands", ""),
@@ -140,33 +172,37 @@ def add_item(data: dict):
         "stock": int(data.get("stock", 0)),
     }
     inventory.append(new_item)
+    _save(inventory)
     return new_item
 
 
 def update_item(item_id: str, updates: dict):
     """
-    Apply partial updates (PATCH semantics) to an existing item.
+    Apply partial updates (PATCH semantics) to an existing item and persist.
     Returns the updated item, or None if not found.
     """
-    item = get_item_by_id(item_id)
+    inventory = _load()
+    item = next((i for i in inventory if i["id"] == str(item_id)), None)
     if item is None:
         return None
-    # Coerce numeric fields if supplied
     if "price" in updates:
         updates["price"] = float(updates["price"])
     if "stock" in updates:
         updates["stock"] = int(updates["stock"])
     item.update(updates)
+    _save(inventory)
     return item
 
 
 def delete_item(item_id: str):
     """
-    Remove an item by id.
+    Remove an item by id and persist the change.
     Returns the removed item, or None if not found.
     """
-    item = get_item_by_id(item_id)
+    inventory = _load()
+    item = next((i for i in inventory if i["id"] == str(item_id)), None)
     if item is None:
         return None
     inventory.remove(item)
+    _save(inventory)
     return item

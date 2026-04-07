@@ -1,5 +1,6 @@
 {
   "pythonPath": "/home/cal/.local/share/virtualenvs/flask-inventory-api-eaWU5V9v",
+  "pythonPath": "./venv/bin/python",
   "extraPaths": ["."],
   "include": ["app", "tests"]
 }
