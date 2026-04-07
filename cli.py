@@ -19,7 +19,7 @@ API_BASE = "http://127.0.0.1:5000/inventory"
 
 def _get(path="") -> dict:
     try:
-        r = requests.get(API_BASE + path, timeout=5)
+        r = requests.get(API_BASE + path, timeout=25)
         return r.json()
     except requests.ConnectionError:
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
@@ -30,7 +30,7 @@ def _get(path="") -> dict:
 
 def _post(path="", body=None) -> dict:
     try:
-        r = requests.post(API_BASE + path, json=body or {}, timeout=5)
+        r = requests.post(API_BASE + path, json=body or {}, timeout=25)
         return r.json()
     except requests.ConnectionError:
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
@@ -41,7 +41,7 @@ def _post(path="", body=None) -> dict:
 
 def _patch(path, body) -> dict:
     try:
-        r = requests.patch(API_BASE + path, json=body, timeout=5)
+        r = requests.patch(API_BASE + path, json=body, timeout=25)
         return r.json()
     except requests.ConnectionError:
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
@@ -52,7 +52,7 @@ def _patch(path, body) -> dict:
 
 def _delete(path) -> dict:
     try:
-        r = requests.delete(API_BASE + path, timeout=5)
+        r = requests.delete(API_BASE + path, timeout=25)
         return r.json()
     except requests.ConnectionError:
         _fatal("Cannot reach the API server. Is 'python run.py' running?")
