@@ -1,18 +1,16 @@
 """
-routes.py
----------
 Flask Blueprint that exposes all inventory REST endpoints.
 
 Routes
 ------
-GET    /inventory            – list all items
-GET    /inventory/<id>       – get one item
-POST   /inventory            – create a new item
-PATCH  /inventory/<id>       – partially update an item
-DELETE /inventory/<id>       – delete an item
-GET    /inventory/search/barcode/<barcode>  – look up on OpenFoodFacts by barcode
-GET    /inventory/search/name/<name>        – search OpenFoodFacts by name
-POST   /inventory/import/<barcode>          – fetch from OFF and add to inventory
+GET    /inventory            # list all items
+GET    /inventory/<id>       # get one item
+POST   /inventory            # create a new item
+PATCH  /inventory/<id>       # partially update an item
+DELETE /inventory/<id>       # delete an item
+GET    /inventory/search/barcode/<barcode>  # look up on OpenFoodFacts by barcode
+GET    /inventory/search/name/<name>        # search OpenFoodFacts by name
+POST   /inventory/import/<barcode>          # fetch from OFF and add to inventory
 """
 
 from flask import Blueprint, jsonify, request
@@ -29,7 +27,7 @@ from app.external_api import fetch_by_barcode, fetch_by_name
 inventory_bp = Blueprint("inventory", __name__, url_prefix="/inventory")
 
 
-# ── Helper ────────────────────────────────────────────────────────────────────
+# Helper
 
 def _ok(data, status=200):
     return jsonify({"status": "success", "data": data}), status
@@ -39,7 +37,7 @@ def _err(message, status=400):
     return jsonify({"status": "error", "message": message}), status
 
 
-# ── External-API endpoints ────────────────────────────────────────────────────
+# External-API endpoints
 # IMPORTANT: These must be registered BEFORE the /<string:item_id> routes,
 # otherwise Flask will match "search" as an item_id and never reach these.
 
@@ -82,7 +80,7 @@ def import_from_api(barcode):
     return _ok(new_item, 201)
 
 
-# ── CRUD endpoints ────────────────────────────────────────────────────────────
+# CRUD endpoints
 
 @inventory_bp.route("", methods=["GET"])
 def list_inventory():

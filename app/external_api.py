@@ -1,14 +1,6 @@
 """
-external_api.py
----------------
 Integration with the OpenFoodFacts public API.
 Provides helpers to search by barcode or product name.
-
-Common reasons a barcode returns nothing:
-1. No User-Agent header  → OpenFoodFacts blocks the request silently
-2. Timeout too short     → their servers are slow, 8s often isn't enough
-3. Product not in their database (try scanning on https://world.openfoodfacts.org first)
-4. Barcode has leading zeros that got stripped (always pass as a string)
 """
 
 import requests
@@ -50,11 +42,6 @@ def fetch_by_barcode(barcode: str) -> dict | None:
     Query the OpenFoodFacts API for a product by barcode.
 
     Returns a dict of product fields on success, or None on failure.
-
-    Tips:
-    - Always pass barcode as a string e.g. fetch_by_barcode("0012345678905")
-    - Leading zeros matter — "012345" != "12345"
-    - Verify the barcode exists first at https://world.openfoodfacts.org
     """
     url = f"{BASE_URL}/api/v0/product/{barcode}.json"
 
