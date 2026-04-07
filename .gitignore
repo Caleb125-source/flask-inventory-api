@@ -3,4 +3,4 @@ __pycache__/
 .env
 .venv/
 Pipfile.lock
-.pytest_cache/
+.pytest_cache/inventory.json
